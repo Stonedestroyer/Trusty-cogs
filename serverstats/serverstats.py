@@ -9,7 +9,7 @@ from io import BytesIO
 from redbot.core import commands
 from redbot.core import checks, Config
 from redbot.core.i18n import Translator, cog_i18n
-from redbot.core.utils.chat_formatting import pagify
+from redbot.core.utils.chat_formatting import pagify, box
 from redbot.core.utils.menus import DEFAULT_CONTROLS, menu
 from redbot.core.utils.predicates import MessagePredicate, ReactionPredicate
 from redbot.core.utils.menus import start_adding_reactions
@@ -811,6 +811,7 @@ class ServerStats(commands.Cog):
         guilds = sorted(list(self.bot.guilds), key=lambda s: len(s.members), reverse=True)
         msg = ""
         msg_list = []
+        page_list = []
         count = 0
         for i, server in enumerate(guilds):
             if count == 10:
@@ -820,7 +821,9 @@ class ServerStats(commands.Cog):
                 await asyncio.sleep(0.1)
             msg += f"{server.name}: {len(server.members)}\n"
         msg_list.append(msg)
-        await menu(ctx, msg_list, DEFAULT_CONTROLS)
+        for page in pagify(box(msg)):
+            page_list.append(page)
+        await menu(ctx, page_list, DEFAULT_CONTROLS)
 
     @commands.command(hidden=True)
     @checks.is_owner()
